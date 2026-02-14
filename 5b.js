@@ -2251,6 +2251,11 @@ async function loadingScreen() {
 	req = await fetch('data/images6.json');
 	let resourceData = await req.json();
 
+	// 5beam
+	svg5beamStars = await createImage(resourceData['5beam/stars.svg']);
+	svg5beamPlays = await createImage(resourceData['5beam/plays.svg']);
+	svg5beamLevels = await createImage(resourceData['5beam/levels.svg']);
+
 	svgCSBubble = await createImage(resourceData['ui/csbubble/dia.svg']);
 	svgHPRCCrank = await createImage(resourceData['entities/e0035crank.svg']);
 	svgCoin = await createImage(resourceData['wintoken.svg']);
@@ -6962,7 +6967,9 @@ function drawExploreLevel(x, y, i, levelType, pageType) {
 		ctx.fillStyle = '#333333';
 	}
 
-	ctx.fillRect(x, y, 208, 155);
+	ctx.beginPath();
+	ctx.roundRect(x, y, 208, 155, 3);
+	ctx.fill();
 	// ctx.fillStyle = '#cccccc';
 	// ctx.fillRect(x+8, y+8, 192, 108);
 	if (levelType == 0) ctx.drawImage(thumbs[i], x + 8, y + 8, 192, 108);
@@ -6984,17 +6991,17 @@ function drawExploreLevel(x, y, i, levelType, pageType) {
 		ctx.fillText('by ' + username, x + 7, y + 138.3);
 
 
-		// Views icon & counter
+		// Plays icon & counter
+		ctx.drawImage(svg5beamPlays, x + 165, y + 139, 10, 10);
+		ctx.drawImage(svg5beamStars, x + 190, y + 139, 10, 10);
 		ctx.fillStyle = '#47cb46';
-		ctx.beginPath();
-		ctx.moveTo(x + 194, y + 137.3);
-		ctx.lineTo(x + 189, y + 146.3);
-		ctx.lineTo(x + 199, y + 146.3);
-		ctx.closePath();
-		ctx.fill();
-
 		ctx.textAlign = "right";
-		ctx.fillText(thisExploreLevel.plays, x + 186, y + 138.3);
+		ctx.fillText(thisExploreLevel.plays, x + 163, y + 140);
+		ctx.textAlign = "left";
+		
+		ctx.fillStyle = '#ffe000';
+		ctx.textAlign = "right";
+		ctx.fillText(thisExploreLevel.stars, x + 188, y + 140);
 		ctx.textAlign = "left";
 	}
 
@@ -9645,6 +9652,7 @@ function draw() {
 			ctx.textBaseline = 'middle';
 			let tabx = 28;
 			for (let i = 0; i < exploreTabWidths.length; i++) {
+				ctx.beginPath();
 				if (i == exploreTab) ctx.fillStyle = '#666666';
 				else if (onRect(_xmouse, _ymouse, tabx, 20, exploreTabWidths[i], 45)) {
 					ctx.fillStyle = '#b3b3b3';
@@ -9655,7 +9663,8 @@ function draw() {
 						setExplorePage(1);
 					}
 				} else ctx.fillStyle = '#999999';
-				ctx.fillRect(tabx, 20, exploreTabWidths[i], 45);
+				ctx.roundRect(tabx, 20, exploreTabWidths[i], 45, [10, 10, 0, 0]);
+				ctx.fill();
 				ctx.fillStyle = '#ffffff';
 				ctx.fillText(exploreTabNames[i], tabx + exploreTabWidths[i] / 2, 45);
 				// exploreTabNames[i];
@@ -9667,7 +9676,7 @@ function draw() {
 				drawExploreLoadingText();
 			} else {
 				for (let i = 0; i < explorePageLevels.length; i++) {
-					drawExploreLevel(232 * (i % 4) + 28, Math.floor(i / 4) * 182 + (exploreTab==2?140:130), i, exploreTab==1?1:0, 0);
+					drawExploreLevel(232 * (i % 4) + 28, Math.floor(i / 4) * 175 + (exploreTab==2?140:130), i, exploreTab==1?1:0, 0);
 				}
 			}
 
@@ -9693,8 +9702,9 @@ function draw() {
 			}
 
 			if (exploreTab != 2) { // Sort and pages aren't supported for search yet
+				ctx.beginPath();
 				// Sort by
-				if (onRect(_xmouse, _ymouse, 902-exploreSortTextWidth, 85, exploreSortTextWidth+30, 30)) {
+				if (onRect(_xmouse, _ymouse, 565, 85, exploreSortTextWidth+30, 30)) {
 					ctx.fillStyle = '#404040';
 					onButton = true;
 					if (mouseIsDown && !pmouseIsDown) {
@@ -9702,8 +9712,11 @@ function draw() {
 						setExplorePage(1);
 					}
 				} else ctx.fillStyle = '#333333';
-				ctx.fillRect(902-exploreSortTextWidth, 85, exploreSortTextWidth+30, 30);
-				if (onRect(_xmouse, _ymouse, 565, 85, exploreSortTextWidth+10, 30)) {
+				ctx.roundRect(565, 85, exploreSortTextWidth+10, 30, 5);
+				ctx.fill();
+				
+				ctx.beginPath();
+				if (onRect(_xmouse, _ymouse, 902-exploreSortTextWidth, 85, exploreSortTextWidth+10, 30)) {
 					ctx.fillStyle = '#404040';
 					onButton = true;
 					if (mouseIsDown && !pmouseIsDown) {
@@ -9712,13 +9725,17 @@ function draw() {
 						getDaily()
 					}
 				} else ctx.fillStyle = '#333333';
-				ctx.fillRect(565, 85, exploreSortTextWidth+10, 30);
+				ctx.roundRect(902-exploreSortTextWidth, 85, exploreSortTextWidth+30, 30, 5);
+
+				ctx.fill();
 				ctx.textBaseline = 'top';
 				ctx.textAlign = 'left';
 				ctx.fillStyle = '#ffffff';
 				ctx.font = '24px Helvetica';
-				ctx.fillText('Sort by: ' + exploreSortText[exploreSort], 902-exploreSortTextWidth + 5, 88);
-				ctx.fillText('Play the Daily!', 570, 88);
+
+				let sortingText = exploreSortText[exploreSort][0].toLocaleUpperCase() + exploreSortText[exploreSort].slice(1)
+				ctx.fillText(sortingText, 570, 88);
+				ctx.fillText('Play the Daily!', 902-exploreSortTextWidth + 5, 88);
 			}
 			// Page number
 			ctx.fillStyle = '#ffffff';
@@ -9841,13 +9858,22 @@ function draw() {
 					}
 				}
 
-				// Views icon & counter
+				// Plays counter
 				ctx.fillStyle = '#47cb46';
 				ctx.font = 'bold 18px Helvetica';
 				ctx.textAlign = 'right';
 
-				let pluralViewText = exploreLevelPageLevel.plays === 1
-				ctx.fillText(exploreLevelPageLevel.plays + (pluralViewText ? ' play' : ' plays'), 410, 325);
+				let pluralPlayText = exploreLevelPageLevel.plays === 1
+				ctx.fillText(exploreLevelPageLevel.plays + (pluralPlayText ? ' play' : ' plays'), 410, 325);
+				ctx.textAlign = 'left';
+
+				// Stars counter
+				ctx.fillStyle = '#ffe000';
+				ctx.font = 'bold 18px Helvetica';
+				ctx.textAlign = 'right';
+
+				let pluralStarText = exploreLevelPageLevel.stars === 1
+				ctx.fillText(exploreLevelPageLevel.stars + (pluralStarText ? ' star' : ' stars'), 410, 352);
 				ctx.textAlign = 'left';
 
 				// Difficulty in levelpacks arent supported yet
@@ -9901,6 +9927,11 @@ function draw() {
 
 				if (!isGuest) {
 					drawSimpleButton('More By This User', exploreMoreByThisUser, 226, 417, 188, 30, 3, '#ffffff', '#404040', '#808080', '#808080');
+				}
+
+				if (loggedInExploreUser5beamID !== -1) {
+					const starred = exploreLevelPageLevel.starred;
+					drawSimpleButton(starred ? 'Unstar' : 'Star', exploreMoreByThisUser, 30, 417, 188, 30, 3, '#ffffff', '#404040', '#808080', '#808080');
 				}
 
 				if (exploreLevelPageType != 1 && loggedInExploreUser5beamID === exploreLevelPageLevel.creator.id) {
@@ -10775,6 +10806,35 @@ async function postExploreModifyLevel(id, title, desc, difficulty, file) {
 			cancelEditExploreLevel();
 		});
 }
+
+async function postExploreStarLevel(id) {
+	requestAdded();
+
+	return fetch('https://5beam.zelo.dev/api/level/star?id=' + id, {method: 'POST', headers: getAuthHeader()})
+		.then(response => {
+			requestResolved();
+		})
+		.catch(err => {
+			console.log(err);
+			setLCMessage(`${response.status} Sadly we're unable to un/star this level. Please try again later!`);
+			requestError();
+		});
+}
+
+async function postExploreStarLevelpack(id) {
+	requestAdded();
+
+	return fetch('https://5beam.zelo.dev/api/levelpack/star?id=' + id, {method: 'POST', headers: getAuthHeader()})
+		.then(response => {
+			requestResolved();
+		})
+		.catch(err => {
+			console.log(err);
+			setLCMessage(`${response.status} Sadly we're unable to un/star this levelpack. Please try again later!`);
+			requestError();
+		});
+}
+
 
 // Before, this was in a separate file like it was in the Flash version, but it made minifying take more steps and I didn't really edit it that often, so I decided it was just easier to move it into the same file.
 class Character {
