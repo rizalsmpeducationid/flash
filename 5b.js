@@ -2666,6 +2666,18 @@ function setExploreUserPage(type, page) {
 	return getExploreUserPage(exploreUser.id, exploreUserPageNumbers[type], type, 0);
 }
 
+async function exploreStarLevel() {
+	const { starred } = await postExploreStarLevel(exploreLevelPageLevel.id);
+	exploreLevelPageLevel.starred = starred;
+	exploreLevelPageLevel.stars += starred ? 1 : -1;
+}
+
+async function exploreStarLevelpack() {
+	const { starred } = await postExploreStarLevelpack(exploreLevelPageLevel.id);
+	exploreLevelPageLevel.starred = starred;
+	exploreLevelPageLevel.stars += starred ? 1 : -1;
+}
+
 function menu2Back() {
 	if (playingLevelpack && menuScreen == 2) {
 		if (levelpackType === 0) {
@@ -9931,7 +9943,7 @@ function draw() {
 
 				if (loggedInExploreUser5beamID !== -1) {
 					const starred = exploreLevelPageLevel.starred;
-					drawSimpleButton(starred ? 'Unstar' : 'Star', exploreMoreByThisUser, 30, 417, 188, 30, 3, '#ffffff', '#404040', '#808080', '#808080');
+					drawSimpleButton(starred ? 'Unstar' : 'Star', exploreLevelPageType ? exploreStarLevelpack : exploreStarLevel, 30, exploreLevelPageType ? 455 : 417 , 188, 30, 3, '#ffffff', '#404040', '#808080', '#808080');
 				}
 
 				if (exploreLevelPageType != 1 && loggedInExploreUser5beamID === exploreLevelPageLevel.creator.id) {
@@ -10807,32 +10819,34 @@ async function postExploreModifyLevel(id, title, desc, difficulty, file) {
 		});
 }
 
+/** @return {Promise<{starred: boolean}>} */
 async function postExploreStarLevel(id) {
 	requestAdded();
 
-	return fetch('https://5beam.zelo.dev/api/level/star?id=' + id, {method: 'POST', headers: getAuthHeader()})
-		.then(response => {
-			requestResolved();
-		})
-		.catch(err => {
-			console.log(err);
-			setLCMessage(`${response.status} Sadly we're unable to un/star this level. Please try again later!`);
-			requestError();
-		});
+	try {
+		const response = await fetch('https://5beam.zelo.dev/api/level/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
+		requestResolved();
+		return await response.json();
+	} catch (err) {
+		console.log(err);
+		setLCMessage(`${response.status} Sadly we're unable to un/star this level. Please try again later!`);
+		requestError();
+	}
 }
 
+/** @return {Promise<{starred: boolean}>} */
 async function postExploreStarLevelpack(id) {
 	requestAdded();
 
-	return fetch('https://5beam.zelo.dev/api/levelpack/star?id=' + id, {method: 'POST', headers: getAuthHeader()})
-		.then(response => {
-			requestResolved();
-		})
-		.catch(err => {
-			console.log(err);
-			setLCMessage(`${response.status} Sadly we're unable to un/star this levelpack. Please try again later!`);
-			requestError();
-		});
+	try {
+		const response = await fetch('https://5beam.zelo.dev/api/levelpack/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
+		requestResolved();
+		return await response.json();
+	} catch (err) {
+		console.log(err);
+		setLCMessage(`${response.status} Sadly we're unable to un/star this levelpack. Please try again later!`);
+		requestError();
+	}
 }
 
 
