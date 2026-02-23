@@ -2265,18 +2265,15 @@ async function loadingScreen() {
 		imgBgs[i] = await createImage(resourceData['bg/bg' + i.toString().padStart(4, '0') + '.png']);
 	}
 	for (let i = 0; i < blockProperties.length; i++) {
-		let id = i.toString().padStart(4, '0');
 		if (blockProperties[i][16] == 1 || (blockProperties[i][15] && blockProperties[i][16] == 0)) {
-			svgTiles[i] = await createImage(resourceData['blocks/b' + id + '.svg']);
-			svgTilesVB[i] = getVB(resourceData['blocks/b' + id + '.svg']);
+			svgTiles[i] = makeTilePlaceholder(i);
+			svgTilesVB[i] = [0, 0, 30, 30];
 		} else if (blockProperties[i][16] > 1) {
 			svgTiles[i] = new Array(blockProperties[i][16]);
 			svgTilesVB[i] = new Array(blockProperties[i][16]);
 			for (let j = 0; j < svgTiles[i].length; j++) {
-				svgTiles[i][j] = await createImage(
-					resourceData['blocks/b' + id + 'f' + j.toString().padStart(4, '0') + '.svg']
-				);
-				svgTilesVB[i][j] = getVB(resourceData['blocks/b' + id + 'f' + j.toString().padStart(4, '0') + '.svg']);
+				svgTiles[i][j] = makeTilePlaceholder(i);
+				svgTilesVB[i][j] = [0, 0, 30, 30];
 			}
 		}
 	}
@@ -6786,6 +6783,30 @@ function tileCharFromID(id) {
 	else tileCharCode = id + 81;
 	if (id > 120) tileCharCode -= 146;
 	return String.fromCharCode(tileCharCode);
+}
+
+function tileCodeFromID(id) {
+	let high = Math.floor(id / 111);
+	let low = id % 111;
+	return tileCharFromID(high) + tileCharFromID(low);
+}
+
+function makeTilePlaceholder(id) {
+	let tile = document.createElement('canvas');
+	tile.width = 30 * scaleFactor;
+	tile.height = 30 * scaleFactor;
+	let tilectx = tile.getContext('2d');
+	tilectx.fillStyle = '#d10000';
+	tilectx.fillRect(0, 0, tile.width, tile.height);
+	tilectx.strokeStyle = '#7a0000';
+	tilectx.lineWidth = 2 * scaleFactor;
+	tilectx.strokeRect(0, 0, tile.width, tile.height);
+	tilectx.fillStyle = '#ffffff';
+	tilectx.font = 'bold ' + (12 * scaleFactor) + 'px Helvetica';
+	tilectx.textAlign = 'center';
+	tilectx.textBaseline = 'middle';
+	tilectx.fillText(tileCodeFromID(id), tile.width / 2, tile.height / 2);
+	return tile;
 }
 
 function tileIDFromChar(c) {
