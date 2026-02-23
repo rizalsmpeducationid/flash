@@ -6785,10 +6785,13 @@ function tileCharFromID(id) {
 	return String.fromCharCode(tileCharCode);
 }
 
+const tileCodeChars = ['.','/','0','1','2','3','4','5','6','7','8','9',':',';','>','=','<','?','@','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_','`','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','{','|','}','~','¡','¢','£','¤','¥','¦','§','¨','©','ª','«','¬','€','®','¯','°','±','²','³','´','µ','¶','¸','¹','º','»','¼','½','¾','¿'];
+
 function tileCodeFromID(id) {
-	let high = Math.floor(id / 111);
-	let low = id % 111;
-	return tileCharFromID(high) + tileCharFromID(low);
+	let base = tileCodeChars.length;
+	let high = Math.floor(id / base) % base;
+	let low = id % base;
+	return tileCodeChars[high] + tileCodeChars[low];
 }
 
 function makeTilePlaceholder(id) {
